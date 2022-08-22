@@ -4,9 +4,13 @@ require('dotenv').config();
 const { REST } = require("@discordjs/rest");
 const { isContextMenuApplicationCommandInteration } = require("discord-api-types/utils/v9")
 const { Routes } = require("discord-api-types/v9")
-const { token } = process.env
 const { Client, Collection, GatewayIntentBits} = require("discord.js");
 const fs = require("fs");
+const { connect } = require("mongoose");
+const chalk = require("chalk");
+
+
+const { discordToken, dataBaseToken, clientId } = process.env
 
 const client = new Client(
     { 
@@ -32,12 +36,12 @@ for (const file of commandFiles) {
 }
 
 client.on("ready", (stream) => {
-    const guild_ids = client.guilds.cache.map(guild => guild.id);
+    const guildIds = client.guilds.cache.map(guild => guild.id);
 
-    const rest = new REST({version: "9"}).setToken(process.env.token);
-    for (const guildId of guild_ids) {
-        rest.put(Routes.applicationGuildCommands(process.env.client_id, guildId), {body: commands})
-            .then(() => console.log("Successfully updated commands for guild " + guildId))
+    const rest = new REST({version: "9"}).setToken(discordToken);
+    for (const guildId of guildIds) {
+        rest.put(Routes.applicationGuildCommands(clientId, guildId), {body: commands})
+            .then(() => console.log(chalk.green("Successfully updated commands for guild " + guildId)))
             .catch(console.error)
             
     }
@@ -61,4 +65,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 }),
 
-client.login(process.env.token)
+client.login(discordToken)
+// (async () => {
+//      await connect(dataBaseToken).catch(console.error);
+// }) ();
