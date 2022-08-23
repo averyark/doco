@@ -14,6 +14,10 @@
     "discord-api-types": "^0.37.3",
     "discord.js": "^14.2.0",
     "dotenv": "^16.0.1",
-    "mongoose": "^6.5.2"
+    "mongoose": "^6.5.2",
+    "moongose": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/mongoose": "^5.11.97"
   }
 }

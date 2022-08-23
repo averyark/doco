@@ -5,6 +5,6 @@ module.exports = {
         .setName("globalmessage")
         .setDescription("PlaceHolder"),
     async execute(interation) {
-        //await interation.reply("Pong!");
+        await interation.reply("Pong!");
     }
 }
