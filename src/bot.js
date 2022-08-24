@@ -1,64 +1,39 @@
-require('dotenv').config();
-
+require("dotenv").config();
 
 const { REST } = require("@discordjs/rest");
-const { isContextMenuApplicationCommandInteration } = require("discord-api-types/utils/v9")
-const { Routes } = require("discord-api-types/v9")
-const { token } = process.env
-const { Client, Collection, GatewayIntentBits} = require("discord.js");
+const { Routes } = require("discord-api-types/v9");
+const { Client, Collection, GatewayIntentBits } = require("discord.js");
 const fs = require("fs");
+const { connect } = require("mongoose");
+const chalk = require("chalk");
+const path = require("path");
 
-const client = new Client(
-    { 
-        intents: GatewayIntentBits.Guilds
+const { discordToken, databaseToken } = process.env;
 
-    }
-);
-const path = require("path")
+const client = new Client({
+    intents: GatewayIntentBits.Guilds,
+});
 
-const commands = [];
 client.commands = new Collection();
+client.buttons = new Collection();
+client.selectMenus = new Collection();
+client.modals = new Collection();
+client.commandsArray = [];
 
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+const functionsPath = path.join(__dirname, "functions");
+const functionFiles = fs
+    .readdirSync(functionsPath)
+    .filter((file) => file.endsWith(".js"));
 
-for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath)
-
-    client.commands.set(command.data.name, command);
-    commands.push(command.data.toJSON());
-
+for (const file of functionFiles) {
+    const filePath = path.join(functionsPath, file);
+    require(filePath)(client);
 }
 
-client.on("ready", (stream) => {
-    const guild_ids = client.guilds.cache.map(guild => guild.id);
+client.handleCommands()
+client.handleEvents()
+client.login(discordToken);
 
-    const rest = new REST({version: "9"}).setToken(process.env.token);
-    for (const guildId of guild_ids) {
-        rest.put(Routes.applicationGuildCommands(process.env.client_id, guildId), {body: commands})
-            .then(() => console.log("Successfully updated commands for guild " + guildId))
-            .catch(console.error)
-            
-    }
-})
-
-client.on("interactionCreate", async (interaction) => {
-    if (!interaction.isCommand()) return;
-    
-    const command = client.commands.get(interaction.commandName);
-
-    if (!command) return;
-    
-    try
-    {
-        await command.execute(interaction);
-    }
-    catch(error)
-    {
-        console.error(error)
-        await interaction.reply({content: "There was an error executing this command!"})
-    }
-}),
-
-client.login(process.env.token)
+(async () => {
+    await connect(databaseToken).catch(console.error);
+})();
