@@ -1,8 +1,10 @@
-const { Schema, model } = requrie("mongoose")
+const { Schema, model } = require("mongoose");
 const guildScheme = new Scheme({
-    __id: Schema.Types.ObjectId,
+    _id: Schema.Types.ObjectId,
     guildId: String,
     prefix: String,
+    whitelistRoles: Schema.Types.Array,
+    blacklistRoles: Schema.Types.Array,
 });
 
 module.exports = model("Guild", guildScheme, "guilds");
